@@ -40,7 +40,7 @@ Runtime/install data is local under Windows Local AppData/Joro, outside Git. Exi
 - Earlier independent rig checks passed **31 tests** before the minimal implementation; those include synthetic evidence tests and must not be added to the focused count as if they were all watcher integration tests.
 - Both temporary OpenCode QA sessions were subsequently removed through the client API, after checking their exact IDs and `Joro QA <run-tag>` titles. The private probe output remains as local evidence outside Git.
 - The installed helper is running (PID 60152 as last observed), with live OpenCode activity and `power_requested: true`; no uncertain claims were reported. Windows sign-in startup was independently checked and is **off**. This proves current request issuance, not sustained battery protection.
-- Final focused rerun: all 13 tests passed, Python compilation and Node syntax checks passed, and `git diff --check` passed. Stripping only the manifest-owned Joro callbacks from current Claude settings reproduced the original backup's complete settings object, verifying preservation of all unrelated settings/callbacks. The local update left the same helper running; files and plans remain uncommitted/unpushed.
+- Final focused rerun: all 13 tests passed, Python compilation and Node syntax checks passed, and `git diff --check` passed. Stripping only the manifest-owned Joro callbacks from current Claude settings reproduced the original backup's complete settings object, verifying preservation of all unrelated settings/callbacks. The local update left the same helper running. Project work was committed and pushed as `6074e8b` during wrap-up; the final wrap-up push captures this status correction.
 
 ## Remaining limits and completion status
 
@@ -49,7 +49,7 @@ The minimal helper is locally installable; this is **partial delivery of R1**, n
 - Battery endurance is unproven. The coordinated trial `endurance-e7dad5040701` timed out while arming, with **zero measurement samples**, unchanged policy and a closed native handle. It did not show either success or failure of sleep prevention. No automatic repeat is authorized merely by a general continuation.
 - Full ordinary-Claude-terminal idle timing, all OpenCode permission/background/reload paths and Einherjar-launched behavior are not fully runtime-verified. The implementation reports native requests, not universal coverage.
 - Sign-in startup is supported but was not enabled during installation. Registry round-trip and full uninstall are not claimed tested here; active work intentionally prevents uninstall.
-- No GitHub release/package publication or subsequent push is claimed. No unrelated Council feature has started.
+- Source was pushed as `6074e8b` during wrap-up; no GitHub release/package artifact was published. No unrelated Council feature has started.
 
 Before calling R1 complete, verify the remaining required live behaviors or explicitly agree a narrower finished scope with Alvi. Do not revive the larger framework merely to continue this small delivery.
 
