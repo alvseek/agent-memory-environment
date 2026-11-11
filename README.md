@@ -1,16 +1,50 @@
 # Joro — Agent Environment
 
-Joro is the environment layer for setting up and adjusting the host an agent works on.
+Joro sets up the host an agent works on. Its first capability is a small local Windows keep-awake helper for Claude Code and OpenCode—no MCP server, GUI or power-plan edits.
 
-It owns host-level procedures, such as capturing, overriding, and restoring sleep and hibernate settings. Changes should preserve the original settings and provide a verified way to restore them.
+## Install and use
 
-## Boundaries
+Requires Windows, Python 3.12+ and the clients you want to integrate. From this checkout:
 
-- Joro manages the host environment, not deployed services.
-- Infra manages services and their infrastructure.
-- Hermod manages repository workflows.
-- Munnin manages agent memory contents.
+```powershell
+python setup-scripts/install_keep_awake.py
+python "$env:LOCALAPPDATA/Joro/keep-awake/scripts/windows/keep_awake.py" start
+python "$env:LOCALAPPDATA/Joro/keep-awake/scripts/windows/keep_awake.py" status
+python "$env:LOCALAPPDATA/Joro/keep-awake/scripts/windows/keep_awake.py" stop
+```
 
-## Status
+Installation copies the helper locally, adds Joro's Claude hooks and OpenCode plugin, and installs a `joro-keep-awake` skill for both clients. It preserves unrelated Claude hooks and does not edit OpenCode's JSONC configuration. Installation does not start the helper or enable sign-in startup.
 
-This repository establishes Joro's home. Procedures have not yet been migrated or installed.
+Start monitoring before beginning fresh work. Start a new Claude session after installing its hooks. OpenCode discovers the global local plugin automatically; existing in-flight jobs are not retroactively discovered by this first version.
+
+To enable launch at future Windows sign-ins, use `startup-on`; this does not start the helper immediately. Use `startup-off` to remove that entry. Manual start/stop remains available either way. To uninstall, close active clients and run the installed `setup-scripts/install_keep_awake.py` with `--uninstall` from a separate PowerShell window. It refuses while work is active; modified files, backups and runtime state are preserved rather than overwritten or deleted broadly.
+
+## How it works
+
+| Piece | Job |
+|---|---|
+| [Windows helper](scripts/windows/keep_awake.py) | Tracks live process-owned activity files and requests that Windows remain awake while any covered work remains. Dead process identities are cleaned up. |
+| Claude hooks | Report activity on prompt/tool start. Protection spans permission prompts and Stop-hook continuations; a matching idle notification (normally about a minute later) or session end releases it. |
+| [OpenCode plugin](integrations/opencode/index.js) | Tracks new model/compaction work and managed shells. Permission/form waits suspend that foreground contribution without releasing independently running shells. |
+| [Local procedure](procedures/keep-awake.md) | Gives agents install, manual controls, startup and uninstall commands. |
+
+The helper is one process. Activity files are atomic local records, not a database or network service. Independent work items cannot release one another. Status distinguishes distinct work (`active_count`) from duplicate producer records (`claim_count`). `power_requested` means the native API request was issued—not that every client path or power condition has been proven.
+
+## Limits
+
+- **Modern Standby battery protection is not endurance-verified.** Windows can withdraw system/execution requests on battery. The first coordinated test never started because unplugged-plus-locked conditions were not observed. Do not claim that the watcher guarantees battery or locked-screen operation.
+- Claude idle release requires a matching prompt identity. If the client omits that identity, protection stays on conservatively until session end/process exit or manual stop. Permission waits intentionally retain protection.
+- Only work observed after the adapters load is covered. OpenCode-managed shells are tracked; detached descendants are not automatically discovered. A monitoring error must be investigated rather than treated as evidence of protection.
+- Explicit user sleep, lid-close and critical-battery actions are not overridden. There is no display hold or sleep/hibernate-timeout override.
+
+## Development
+
+```powershell
+python -m unittest discover -s tests -p "test_keep_awake*.py" -v
+```
+
+Focused checks cover activity ownership, stale notifications, dead/reused processes and preservation/idempotence of hook installation. Earlier exploratory QA maps and probes remain in [qa/](qa/README.md); they are not required to install or use the helper. Real client and native-request evidence is recorded in the [watcher plan](plans/2026-11-11-joro-host-agent-setup/SP-1-agent-keep-awake.md).
+
+## Ownership
+
+Joro manages the host, Infra manages deployed services, Hermod manages repository workflows, and Munnin owns memory contents. Read/output limits, completion sounds, model setup and anchor installation remain separate, later work in the [Council plan](plans/2026-11-11-joro-host-agent-setup/core-plan.md).

@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+.venv/
+
+# QA runtime data and host settings stay outside the repository.
