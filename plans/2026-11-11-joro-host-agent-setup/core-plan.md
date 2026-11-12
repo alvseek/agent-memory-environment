@@ -161,7 +161,7 @@ I have to use this document as my **ONLY** source of truth to track which sub-pl
 
 | Sub-Plan | Status | Started | Completed | Agent/Session | Notes |
 |----------|--------|---------|-----------|---------------|-------|
-| SP-1 | IN PROGRESS | 2026-11-11 10:10 | — | software-architect, current session | Alvi approved the minimal cutback. Helper/adapters and local procedure are implemented and installed; manual helper is running, sign-in startup remains off. Focused tests and real client checks recorded in the child plan. Battery endurance and remaining full-scope verification are still open; do not call R1 complete or start lower-priority delivery yet. |
+| SP-1 | DONE | 2026-11-11 10:10 | 2026-11-12 | software-architect, 2026-11-12 session | Closed by Alvi's decision ("yes, mark it done") on the **minimal scope** he approved, not on the original R1 acceptance list. Shipped: helper, native power requests, Claude and OpenCode adapters, installer, agent procedure, focused tests, and the real client evidence recorded in the child plan. Accepted as **unverified and out of scope**: battery/locked-screen endurance, ordinary Claude terminal idle timing, full OpenCode wait/background/reload coverage, Einherjar-launched runs, registry startup round-trip, full uninstall. No GitHub release artifact; no orientation map. R1 is therefore closed as "minimal keep-awake delivered", not as "every original criterion proven". |
 | SP-2 | NOT STARTED | — | — | — | — |
 | SP-3 | NOT STARTED | — | — | — | — |
 | SP-4 | NOT STARTED | — | — | — | — |
@@ -174,9 +174,9 @@ I have to use this document as my **ONLY** source of truth to track which sub-pl
 ## **QA HANDOFF**
 *Filled at Step 18. This council is **not** runtime-verified — this section records the plan for that verification, which happens in a QA session with the stack up. Each sub-plan owns the checklist for its own change; this section owns the batch, which no sub-plan can see.*
 
-- **Sub-plan checklists**: Not created yet; no child has started. Each child records its actual checklist or a justified skip at completion.
+- **Sub-plan checklists**: none exist. SP-1 closed on a deliberately narrowed scope without a `qa/` checklist; its evidence is inline in the child plan instead. Every later child must record its own checklist or a justified skip at completion.
 - **Cross-plan integration**: NOT covered — nothing has been implemented. After each installation, verify that earlier Joro-managed client configuration and behavior remain intact; there is no shared runtime contract to exercise.
-- **Runtime verification**: **NOT DONE.** First action after watcher implementation is its live Windows verification, including active/idle transitions and multiple sessions. Later children verify their own changes against the installed clients. Record actual checklist paths and evidence here as work lands.
+- **Runtime verification**: SP-1's native-request and real-client evidence is recorded in its child plan; that is component evidence, not a batch run. The batch remains **NOT runtime-verified**, and no SP-2 work has started. Record actual checklist paths and evidence here as later work lands.
 - **Release**: Watcher-first delivery; do not hold it for lower-priority work. Release changes that ship together as one batch. Public commits must contain no tenant memory, credentials, machine baselines, or captured private hook payloads. Final feature completion requires all five children, even when the watcher has shipped earlier.
 
 ## **COUNCIL SELF-REVIEW**

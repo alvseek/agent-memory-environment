@@ -42,16 +42,17 @@ Runtime/install data is local under Windows Local AppData/Joro, outside Git. Exi
 - The installed helper is running (PID 60152 as last observed), with live OpenCode activity and `power_requested: true`; no uncertain claims were reported. Windows sign-in startup was independently checked and is **off**. This proves current request issuance, not sustained battery protection.
 - Final focused rerun: all 13 tests passed, Python compilation and Node syntax checks passed, and `git diff --check` passed. Stripping only the manifest-owned Joro callbacks from current Claude settings reproduced the original backup's complete settings object, verifying preservation of all unrelated settings/callbacks. The local update left the same helper running. Project work was committed and pushed as `6074e8b` during wrap-up; the final wrap-up push captures this status correction.
 
-## Remaining limits and completion status
+## Completion status
 
-The minimal helper is locally installable; this is **partial delivery of R1**, not completion of every original acceptance criterion.
+**Closed 2026-11-12 as "minimal keep-awake delivered."** Alvi's decision that day — "yes, mark it done" — settled the open question this section used to carry, which was whether to verify the remaining live behaviours or agree a narrower finished scope. He chose the narrower scope. The helper, adapters and procedure above are what R1 consists of; the items below are accepted as unverified rather than treated as outstanding work.
 
-- Battery endurance is unproven. The coordinated trial `endurance-e7dad5040701` timed out while arming, with **zero measurement samples**, unchanged policy and a closed native handle. It did not show either success or failure of sleep prevention. No automatic repeat is authorized merely by a general continuation.
-- Full ordinary-Claude-terminal idle timing, all OpenCode permission/background/reload paths and Einherjar-launched behavior are not fully runtime-verified. The implementation reports native requests, not universal coverage.
-- Sign-in startup is supported but was not enabled during installation. Registry round-trip and full uninstall are not claimed tested here; active work intentionally prevents uninstall.
-- Source was pushed as `6074e8b` during wrap-up; no GitHub release/package artifact was published. No unrelated Council feature has started.
+- **Battery endurance was never measured.** The coordinated trial `endurance-e7dad5040701` timed out while arming, with **zero samples**, unchanged policy and a closed native handle. It showed neither success nor failure of sleep prevention, so no battery claim is made in either direction.
+- **Ordinary Claude terminal idle timing, full OpenCode permission/background/reload coverage, and Einherjar-launched runs** remain unverified. The implementation reports native request issuance, not universal coverage.
+- **Sign-in startup is supported but was left off**, and the registry startup round-trip and full uninstall are untested; active work intentionally blocks uninstall.
+- **No release artifact and no orientation map exist.** Source was pushed as `6074e8b` during the 2026-11-11 wrap-up.
 
-Before calling R1 complete, verify the remaining required live behaviors or explicitly agree a narrower finished scope with Alvi. Do not revive the larger framework merely to continue this small delivery.
+Reopening any of these is new work with its own decision, not a deferred step of SP-1. The larger SQLite/registry framework that preceded this cut still should not be revived to close them.
+
 
 ## Historical investigation record
 
