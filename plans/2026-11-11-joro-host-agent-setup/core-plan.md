@@ -4,7 +4,7 @@
 - **Project**: Joro — agent-memory-environment
 - **Date**: 2026-11-11
 - **Agent**: software-architect
-- **Feature**: Host setup for agent activity: prevent automatic sleep, configure read/output limits, notify on completion, expose requested OpenCode models, and relocate anchor-memory installation responsibility.
+- **Feature**: Host setup for agent activity: prevent automatic sleep, configure read/output limits, notify on completion, expose requested OpenCode models, relocate anchor-memory installation responsibility, and — deferred — keep a chosen conversation's prompt cache warm.
 - **Source Protocol**: `/council-of-wizards` — /council-of-wizards
 
 *CRITICAL INSTRUCTION: To continue this plan: load the source protocol above, then inspect which sections below are filled vs unfilled to infer your current step.*
@@ -62,6 +62,7 @@ None — not a sub-plan.
 | R3 | Completion sounds | Provide configurable sound notification after a covered agent finishes a task. Define and verify completion separately from approval waits, failure, cancellation, and child/background activity; exact alert policy remains for the child plan. |
 | R4 | OpenCode model availability | Make the requested OpenRouter DeepSeek model/provider/precision selection available in OpenCode, after verifying the exact identifier intended by "relace/fp4" and current route capabilities. Verify effective selection rather than only a picker label. Do not silently change the default model or purchase credit. |
 | R5 | Anchor-memory installation ownership | Move the host installation workflow to Joro while Munnin retains ownership and supply of memory content. Preserve permanent-layer bytes and unrelated harness instructions, keep tenant content outside the public repository, and settle compatibility for existing callers before removing the old entry point. |
+| R6 | Cache warming mechanism | Keep one chosen conversation's provider-side prompt cache warm, on a chosen platform, with a per-model lifetime taken from provider data and an on/off that a person or an agent can operate. **Deferred**: no code and no configuration change has been made, and the delivery shape is still an open decision. Constraints already established rather than assumed: a standalone script cannot refresh a session's prefix because only the harness holds the exact rendered tools-plus-history; Claude Code offers no unrecorded ping path, since `-p --resume` appends a real turn to that transcript; and warming a short non-renewing cache costs more than a single cold miss. |
 
 **Accepted requirements-round defaults**: Windows first; Claude means Claude Code only, not ordinary Desktop/browser chats; waiting for human input does not itself keep the PC awake; Einherjar coverage is verified through its underlying Claude/OpenCode runs. Work remains ordered R1 through R5 by Alvi's priority. Installation and migration actions are not authorized merely by this requirements approval.
 
@@ -109,6 +110,7 @@ Requirements and scope assessment confirmed by Alvi: "go". Decomposition subsequ
 | SP-3 | Completion sounds | Evaluate native features, define completion alert behavior, and verify sound delivery. | R3 | QW initially | [SP-3-completion-sounds.md](SP-3-completion-sounds.md) |
 | SP-4 | OpenCode model selection | Resolve the requested model/provider/precision, configure selectable entries, and verify routing. | R4 | QW initially | [SP-4-model-selection.md](SP-4-model-selection.md) |
 | SP-5 | Anchor-memory migration | Transfer host installation responsibility to Joro with byte-preserving installation and a compatible transition from Munnin. | R5 | HW | [SP-5-anchor-memory-migration.md](SP-5-anchor-memory-migration.md) |
+| SP-6 | KV cache warming | Keep one conversation's prompt cache warm on a chosen platform, with a per-model lifetime and a manual or agent-driven switch; delivery shape still open. Deferred. | R6 | HW | [SP-6-kv-cache-warming.md](SP-6-kv-cache-warming.md) |
 
 These are reserved child-plan paths. Child files are created when the approved Council launches them; they do not exist yet.
 
@@ -141,11 +143,12 @@ graph LR
     SP3[SP-3: Sounds]
     SP4[SP-4: Models]
     SP5[SP-5: Anchor migration]
+    SP6[SP-6: Cache warming — deferred]
 ```
 
 **Parallel opportunities**: No technical prerequisite edges are currently required between sub-plans, but parallel execution is not selected. Run SP-1 through SP-5 sequentially in priority order. Do not introduce runtime coupling solely to share lifecycle vocabulary.
 
-**Critical path**: No multi-plan technical dependency chain has been established. The chosen execution sequence is SP-1, then SP-2, then SP-3, then SP-4, then SP-5; no duration estimate is claimed. Watcher investigation, implementation and verification must finish before lower-priority execution begins.
+**Critical path**: No multi-plan technical dependency chain has been established. The chosen execution sequence is SP-1, then SP-2, then SP-3, then SP-4, then SP-5, with SP-6 deferred outside that sequence until Alvi schedules it; no duration estimate is claimed. Watcher investigation, implementation and verification must finish before lower-priority execution begins.
 
 **Review gate**: Decomposition confirmed by Alvi: "proceed". This document is ready for final Council review. After Alvi instructs execution to start, launch SP-1 through its assigned High Wizard protocol; that child owns its implementation decisions and approval gates. Do not interpret Council approval as permission to skip those gates.
 
@@ -166,6 +169,7 @@ I have to use this document as my **ONLY** source of truth to track which sub-pl
 | SP-3 | NOT STARTED | — | — | — | — |
 | SP-4 | NOT STARTED | — | — | — | — |
 | SP-5 | NOT STARTED | — | — | — | — |
+| SP-6 | NOT STARTED | — | — | — | **Deferred on 2026-11-12** — Alvi: "maybe add it as SP-6. we will try implement it when we have time. but for now we will defer." Not blocked, just not begun: no code, no config change. Settled before deferral: OpenCode ships warming but only at global, provider and model granularity, and it is off in this machine's config; Claude Code has TTL settings with no keepalive and a 1-hour ceiling; a standalone script cannot refresh a session's prefix. Open at launch: profile-based config (A) vs per-conversation controller (B) vs owning the loop (C), and whether Claude Code's `-p --resume` pings may leave turns in a transcript. It writes `opencode.jsonc` provider settings, the same file SP-4 does, so whichever runs second must preserve the other's entries. |
 
 **Status values**: NOT STARTED → IN PROGRESS → DONE → BLOCKED (with reason in Notes)
 
