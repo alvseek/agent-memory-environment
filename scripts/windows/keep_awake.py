@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 import uuid
 import winreg
 
@@ -62,7 +63,17 @@ def write(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
     temporary.write_bytes((json.dumps(value, indent=2) + "\n").encode())
-    temporary.replace(path)
+    # Any process holding the target open — a status call, antivirus, an editor — makes the
+    # replace fail with a sharing violation on Windows, so retry briefly rather than end the helper.
+    for attempt in range(40):
+        try:
+            temporary.replace(path)
+            return
+        except PermissionError:
+            if attempt == 39:
+                temporary.unlink(missing_ok=True)
+                raise
+            time.sleep(0.05)
 
 
 def claim(data):
