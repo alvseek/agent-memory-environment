@@ -11,7 +11,7 @@ import time
 import unittest
 from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/windows"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "joro-awake/scripts/windows"))
 from joro_watcher.power import EXECUTION_REQUIRED, SYSTEM_REQUIRED, NativePowerAPI, PowerRequest
 
 

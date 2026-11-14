@@ -15,7 +15,7 @@ import uuid
 
 import bench
 
-sys.path.insert(0, str(bench.REPO / "scripts/windows"))
+sys.path.insert(0, str(bench.REPO / "joro-awake/scripts/windows"))
 from joro_watcher.power import PowerRequest
 
 

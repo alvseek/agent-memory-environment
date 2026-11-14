@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import unittest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/windows"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "joro-awake/scripts/windows"))
 from joro_watcher.power import DISPLAY_REQUIRED, EXECUTION_REQUIRED, SYSTEM_REQUIRED, PowerRequest
 
 

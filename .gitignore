@@ -2,4 +2,7 @@ __pycache__/
 *.py[cod]
 .venv/
 
+# Built release archives stay local; distribution output is not source.
+dist/
+
 # QA runtime data and host settings stay outside the repository.
