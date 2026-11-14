@@ -1,6 +1,6 @@
 # QA Instrument Map — Joro
 
-> Historical exploratory-bench audit, last scan 2026-11-11. The watcher was subsequently simplified; this map is not its current implementation inventory. See the [project README](../README.md) and [watcher plan](../plans/2026-11-11-joro-host-agent-setup/SP-1-agent-keep-awake.md). The finite-probe rig remains executable, but is not required to operate Joro.
+> Audit refreshed 2026-11-14 across the whole project. The finite-probe rig remains exploratory, not the running watcher's verification system. Current product operation is in the [project README](../README.md); tray/log boundary coverage and visual checks are indexed below.
 
 ## R/I/A/O loop maturity
 
@@ -28,7 +28,7 @@ All four README links resolve to bench.py. Its reset/inject/act/observe function
 |---|---|---|---|
 | Runbooks | exists-documented | /build-qa-bench | [Runbooks map](runbooks/qa-runbooks-map.md) |
 | Playbook | missing | /build-qa-bench | [Playbook map](qa-playbook-map.md) |
-| Checklists | missing | /generate-qa-checklist | [Checklists map](checklists/qa-checklists-map.md) |
+| Checklists | exists-documented | /generate-qa-checklist | [Checklists map](checklists/qa-checklists-map.md) |
 | Fixtures | missing | /integration-test | [Fixtures map](fixtures/qa-fixtures-map.md) |
 | Config | exists-documented | /build-qa-bench | [Config map](config/qa-config-map.md) |
 | Scripts | exists-documented | /build-qa-bench | [Scripts map](scripts/qa-scripts-map.md) |
@@ -36,4 +36,4 @@ All four README links resolve to bench.py. Its reset/inject/act/observe function
 
 ## Verdict
 
-The isolated rig runs and its index resolves. Separate real Windows request-handle lifecycle tests have passed, including a close-omission negative control; this does not establish sustained battery protection. Actual client lifecycle and the full watcher remain unverified. No upstream stage fixture was needed for the native-handle test; feature fixtures/checklists remain pending their owning builders. No playbook is needed for the current single rig; add cross-component guidance when real helper/adapters exist. See the [watcher plan](../plans/2026-11-11-joro-host-agent-setup/SP-1-agent-keep-awake.md) for execution evidence and unproven acceptance criteria.
+The rig's four indexed phase links still resolve and agree with bench.py's functions and dispatch. Focused helper/tray tests and the tray/log filesystem integration tests are discoverable through the READMEs; no upstream fixture was required. The new [checklist](checklists/tray-and-logs.md) separates UI/native checks from automated coverage. Native desktop concurrency, sign-in/uninstall, and battery endurance are not established by the rig or filesystem suite. Historical native request evidence and minimal-scope closure remain in the [watcher plan](../plans/2026-11-11-joro-host-agent-setup/SP-1-agent-keep-awake.md).

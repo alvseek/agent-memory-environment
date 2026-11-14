@@ -1,6 +1,6 @@
 # QA Scripts Map — Joro
 
-> Last scan: 2026-11-11. Scanned the root README, plans and docs/scripts/tests/procedures trees.
+> Last scan: 2026-11-14. Scanned the root README, plans and docs/scripts/tests/procedures trees.
 
 **Category status**: exists-documented
 **Owner**: /build-qa-bench
@@ -16,6 +16,8 @@
 | Request state/error-path unit checks | [test_power_state.py](test_power_state.py) | exists-documented | Linked from README; API doubled, so these do not claim native or battery evidence. |
 | Coordinated DC/locked host observer | [battery_endurance_probe.py](battery_endurance_probe.py) | exists-documented | Read-only native preflight passed; actual endurance result pending. No forced lock/sleep or policy changes. |
 | Endurance-evidence classifier checks | [test_endurance_evidence.py](test_endurance_evidence.py) | exists-documented | Synthetic data only; cannot count as battery protection proof. |
+| Focused helper/tray/installer checks | [tests/](../../tests/) | exists-documented | Root and QA READMEs give the discovery command. |
+| Tray/log filesystem integration | [test_keep_awake_filesystem.py](../../tests/test_keep_awake_filesystem.py) | exists-documented | Real files; native synchronization/process identity doubled. Rotation and awake classification proved red/restored-green. |
 
 ## Gaps
 

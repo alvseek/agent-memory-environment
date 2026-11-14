@@ -16,6 +16,8 @@ import uuid
 import winreg
 
 from joro_watcher.power import PowerRequest
+from joro_watcher.event_log import record
+from joro_watcher import event_log
 
 ROOT = Path(os.environ["LOCALAPPDATA"]) / "Joro" / "keep-awake-state"
 CLAIMS = ROOT / "claims"
@@ -198,10 +200,18 @@ def run():
     try:
         stop, ready = named_event("-stop"), named_event("-ready")
         K.ResetEvent(stop)
+        (ROOT / "helper-error.json").unlink(missing_ok=True)
+        record("start", source="helper", pid=os.getpid())
         info = {"pid": os.getpid(), "birth": birth(os.getpid()), "power_requested": False,
                 "battery_protection": "unverified; Modern Standby battery limits still apply"}
-        write(ROOT / "helper.json", info)
+        write(ROOT / "helper.json", {**info, "updated_at": time.time()})
+        try:
+            start_tray()
+        except Exception as exc:
+            # The visual observer is not a prerequisite for keeping the machine awake.
+            record("tray_start_failed", source="helper", error=str(exc))
         K.SetEvent(ready)
+        previous = None
         while True:
             current = state()
             wanted = current["active_count"] > 0 or current["uncertain_claims"] > 0
@@ -211,7 +221,14 @@ def run():
             elif not wanted and request is not None:
                 request.close()
                 request = None
-            write(ROOT / "helper.json", {**info, **current, "power_requested": request is not None})
+            signature = (request is not None, tuple(current["clients"]), current["uncertain_claims"])
+            if signature != previous:
+                record("helper_state", power_requested=request is not None,
+                       clients=current["clients"], uncertain_claims=current["uncertain_claims"])
+                previous = signature
+            write(ROOT / "helper.json", {**info, **current, "power_requested": request is not None,
+                                         "updated_at": time.time(),
+                                         "diagnostic_error": event_log.LAST_ERROR})
             if K.WaitForSingleObject(stop, 1000) == 0:
                 break
     finally:
@@ -225,10 +242,34 @@ def run():
                     K.CloseHandle(handle)
             K.ReleaseMutex(mutex)
             K.CloseHandle(mutex)
+        record("stop", source="helper")
+
+
+def start_tray():
+    try:
+        tray = json.loads((ROOT / "tray.json").read_text(encoding="utf-8"))
+        if birth(tray["pid"]) == tray["birth"]:
+            return
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    executable = Path(__file__).resolve().parents[2] / ".venv/Scripts/pythonw.exe"
+    if not executable.exists():
+        raise RuntimeError("Joro tray environment missing; run the keep-awake installer")
+    ready = named_event("-tray-ready")
+    try:
+        K.ResetEvent(ready)
+        child = subprocess.Popen([str(executable), str(Path(__file__).resolve()), "tray"],
+                                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                 creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
+        if K.WaitForSingleObject(ready, 5000) != 0:
+            raise RuntimeError(f"Tray did not become ready (PID {child.pid}); inspect ~/.joro/keep-awake.log")
+    finally:
+        K.CloseHandle(ready)
 
 
 def start():
     if status()["running"]:
+        start_tray()
         return status()
     ready = named_event("-ready")
     try:
@@ -267,11 +308,15 @@ def startup(enabled):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("run", "start", "stop", "status", "hook", "event", "startup-on", "startup-off"))
+    parser.add_argument("command", choices=("run", "start", "stop", "exit", "tray", "status", "hook", "event", "startup-on", "startup-off"))
     args = parser.parse_args()
     try:
         if args.command == "run":
             run()
+            return 0
+        if args.command == "tray":
+            from joro_watcher.tray import run as run_tray
+            run_tray(sys.modules[__name__])
             return 0
         if args.command in ("hook", "event"):
             value = json.load(sys.stdin)
@@ -279,7 +324,7 @@ def main():
             return 0  # Hook output must not inject bookkeeping into the conversation.
         if args.command == "start":
             value = start()
-        elif args.command == "stop":
+        elif args.command in ("stop", "exit"):
             existing = status()
             process = K.OpenProcess(0x100000, False, existing["pid"]) if existing["running"] else None
             handle = named_event("-stop")
@@ -294,6 +339,22 @@ def main():
             value = {"stop_requested": True, "running": status()["running"]}
             if value["running"]:
                 raise RuntimeError("Stop was requested but helper exit is not confirmed")
+            if args.command == "exit":
+                try:
+                    tray = json.loads((ROOT / "tray.json").read_text(encoding="utf-8"))
+                    tray_process = (K.OpenProcess(0x100000, False, tray["pid"])
+                                    if birth(tray["pid"]) == tray["birth"] else None)
+                except (FileNotFoundError, KeyError):
+                    tray_process = None
+                tray_exit = named_event("-tray-exit")
+                try:
+                    K.SetEvent(tray_exit)
+                    if tray_process and K.WaitForSingleObject(tray_process, 5000) != 0:
+                        raise RuntimeError("Tray did not exit within five seconds")
+                finally:
+                    K.CloseHandle(tray_exit)
+                    if tray_process:
+                        K.CloseHandle(tray_process)
         elif args.command.startswith("startup-"):
             value = startup(args.command == "startup-on")
         else:
@@ -301,6 +362,10 @@ def main():
         print(json.dumps(value))
         return 0
     except Exception as exc:
+        if args.command not in ("hook", "event"):
+            record("error", source=args.command, error=str(exc))
+        else:
+            record("publisher_error", source=args.command, error_type=type(exc).__name__)
         if args.command == "run":
             write(ROOT / "helper-error.json", {"error": str(exc)})
         print(f"Joro keep-awake: {exc}", file=sys.stderr)

@@ -1,6 +1,6 @@
 # QA Playbook Map — Joro
 
-> Last scan: 2026-11-11. Scanned the root README, plans and docs/scripts/tests/procedures trees.
+> Last scan: 2026-11-14. Scanned the root README, plans and docs/scripts/tests/procedures trees.
 
 **Category status**: missing
 **Owner**: /build-qa-bench

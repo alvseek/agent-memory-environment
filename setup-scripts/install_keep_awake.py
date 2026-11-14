@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 import uuid
+import venv
 
 SOURCE = Path(__file__).resolve().parents[1]
 INSTALL = Path(os.environ["LOCALAPPDATA"]) / "Joro/keep-awake"
@@ -16,8 +17,9 @@ CLAUDE = Path.home() / ".claude/settings.json"
 MANIFEST = INSTALL / "manifest.json"
 UNCHECKED = object()
 FILES = ("scripts/windows/keep_awake.py", "scripts/windows/joro_watcher/__init__.py",
-         "scripts/windows/joro_watcher/power.py", "integrations/opencode/index.js",
-         "procedures/keep-awake.md", "setup-scripts/install_keep_awake.py")
+          "scripts/windows/joro_watcher/power.py", "integrations/opencode/index.js",
+          "scripts/windows/joro_watcher/tray.py", "scripts/windows/joro_watcher/event_log.py",
+          "procedures/keep-awake.md", "setup-scripts/install_keep_awake.py")
 
 
 def digest(data):
@@ -85,6 +87,12 @@ def install():
     # Validate existing settings before writing anything to them.
     if CLAUDE.exists():
         json.loads(CLAUDE.read_text(encoding="utf-8-sig"))
+    environment = INSTALL / ".venv"
+    if not (environment / "Scripts/python.exe").exists():
+        venv.EnvBuilder(with_pip=True).create(environment)
+    subprocess.run([str(environment / "Scripts/python.exe"), "-m", "pip", "install",
+                    "pystray==0.19.5", "Pillow>=10.1,<13"], check=True,
+                   stdout=sys.stderr)
     owned = {}
     def put(target, data):
         current = None
@@ -121,7 +129,7 @@ def uninstall():
     activity = json.loads(current.stdout)
     if activity["active_count"] or activity["uncertain_claims"]:
         raise RuntimeError("Close active Claude/OpenCode sessions first, then uninstall from a separate PowerShell window")
-    subprocess.run([sys.executable, str(helper), "stop"], check=True)
+    subprocess.run([sys.executable, str(helper), "exit"], check=True)
     subprocess.run([sys.executable, str(helper), "startup-off"], check=True)
     edit_settings(manifest["hook_command"], None)
     preserved = []
@@ -135,7 +143,7 @@ def uninstall():
     if not preserved:
         MANIFEST.unlink()
     print(json.dumps({"uninstalled_owned_files": not preserved, "preserved_modified_files": preserved,
-                      "backups_and_runtime_state_preserved": True}))
+                      "backups_runtime_logs_and_environment_preserved": True}))
 
 
 if __name__ == "__main__":
