@@ -10,6 +10,7 @@
 | Material | Location | Grade | Notes |
 |---|---|---|---|
 | Tray and logs | [tray-and-logs.md](tray-and-logs.md) | exists-documented | Risk-derived checks; not yet run or signed off. |
+| Source preview extraction | [joro-awake-source-preview.md](joro-awake-source-preview.md) | exists-documented | Package and forwarding evidence separate from native install/uninstall sign-off. |
 
 ## Gaps
 
