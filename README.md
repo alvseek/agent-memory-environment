@@ -41,7 +41,7 @@ The full product documentation, limits and third-party notices live in [joro-awa
 |---|---|
 | [Windows helper](joro-awake/scripts/windows/keep_awake.py) | Tracks live process-owned activity files and requests that Windows remain awake while any covered work remains. Dead process identities are cleaned up. |
 | [Tray observer](joro-awake/scripts/windows/joro_watcher/tray.py) | Separately observes the helper's report so its icon survives helper failure. |
-| [Event log](joro-awake/scripts/windows/joro_watcher/event_log.py) | Serializes writers and rotation into `~/.joro/keep-awake.log`; up to five files of 1 MiB each, including the current file. Records lifecycle, state changes and errors, not prompts, tool contents or credentials. |
+| [Event log](joro-awake/scripts/windows/joro_watcher/event_log.py) | Serializes writers and rotation into `~/.joro/keep-awake.log`; up to five files of 1 MiB each, including the current file. Records lifecycle, state changes, errors with tracebacks, unclean ends, the exit codes the helper and tray see in each other, and stalls, not prompts, tool contents or credentials; native crashes leave stack dumps in `~/.joro/crash-helper.log` and `crash-tray.log`. |
 | Claude hooks | Report activity on prompt/tool start. Protection spans permission prompts and Stop-hook continuations; a matching idle notification (normally about a minute later) or session end releases it. |
 | [OpenCode plugin](joro-awake/integrations/opencode/index.js) | Tracks new model/compaction work and managed shells. Permission/form waits suspend that foreground contribution without releasing independently running shells. |
 | [Local procedure](joro-awake/procedures/keep-awake.md) | Gives agents install, manual controls, startup and uninstall commands. |
