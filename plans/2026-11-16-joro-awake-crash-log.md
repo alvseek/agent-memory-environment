@@ -61,13 +61,13 @@ Make every way the helper or tray can end leave a line that says when it ended a
 | 9 | Product flow, integration | No decision | Nothing the user does changes, and no file list changes. |
 
 ## Success Criteria
-- [ ] A helper killed with `taskkill /F` leaves a tray line naming its exit code, and the next start records that the previous run ended without a stop.
-- [ ] A tray killed the same way leaves a helper line naming its exit code.
-- [ ] A raised exception in the helper loop is recorded with type and traceback.
-- [ ] Existing 31 tests still pass, and the log bound still holds.
-- [ ] Unit tests written and passing for every step with testable logic (or the step says why it has none)
-- [ ] Static quality review completed (Step 7 — delegated to `/analyze-code-quality`)
-- [ ] QA Handoff completed (Step 8 — checklist built, or auto-skipped with reason recorded)
+- [x] A helper killed with `taskkill /F` leaves a tray line naming its exit code, and the next start records that the previous run ended without a stop.
+- [x] A tray killed the same way leaves a helper line naming its exit code.
+- [x] A raised exception in the helper loop is recorded with type and traceback. (unit test only, not seen in the installed build)
+- [x] Existing 31 tests still pass, and the log bound still holds.
+- [x] Unit tests written and passing for every step with testable logic (or the step says why it has none)
+- [x] Static quality review completed (Step 7 — delegated to `/analyze-code-quality`)
+- [x] QA Handoff completed (Step 8 — checklist built, or auto-skipped with reason recorded)
 
 ## Execution Steps
 1. **Log module**: in `joro-awake/scripts/windows/joro_watcher/event_log.py`, add traceback-carrying error fields, tail-keeping truncation, the uncaught-exception hooks, the bounded fault-file setup, and the exit-code naming table → unit tests for each, including the size bound and the hook-privacy rule.
