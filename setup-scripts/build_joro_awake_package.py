@@ -38,6 +38,7 @@ FILES = (
     "tests/test_keep_awake_filesystem.py",
     "tests/test_keep_awake_installer.py",
     "tests/test_keep_awake_lifecycle.py",
+    "tests/test_keep_awake_opencode.py",
     "tests/test_keep_awake_tray.py",
     "tests/test_keep_awake_tray_lifecycle.py",
 )
