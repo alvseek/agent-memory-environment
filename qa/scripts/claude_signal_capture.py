@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import ExitStack
+import errno
 import json
 from pathlib import Path
 import re
@@ -120,13 +122,32 @@ def settings(directory: Path) -> dict:
 
 def draft(directory: Path) -> dict:
     directory = directory.absolute()
-    # Refuse existing destinations, including unrelated drafts.
-    directory.mkdir(parents=True, exist_ok=False)
     events = directory / "events"
-    events.mkdir()
     config = settings(events)
     path = directory / "settings.draft.json"
-    path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8", newline="\n")
+    if ".." in directory.parts or any(
+        part.is_symlink() or part.is_junction() for part in (directory, *directory.parents)
+    ):
+        raise ValueError("Draft destination must have no linked ancestors or parent traversal")
+
+    def remove_if_empty(folder):
+        try:
+            folder.rmdir()
+        except OSError as exc:
+            if exc.errno not in (errno.ENOTEMPTY, errno.EEXIST):
+                raise
+
+    with ExitStack() as rollback:
+        for folder in (*reversed(directory.parents), directory, events):
+            if folder in directory.parents and folder.is_dir():
+                continue
+            folder.mkdir()
+            rollback.callback(remove_if_empty, folder)
+        with path.open("x", encoding="utf-8", newline="\n") as out:
+            rollback.callback(path.unlink)
+            json.dump(config, out, indent=2)
+            out.write("\n")
+        rollback.pop_all()
     return {"draft": str(path), "events": str(events), "activated": False}
 
 

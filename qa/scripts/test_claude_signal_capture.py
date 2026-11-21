@@ -128,6 +128,33 @@ class SignalCaptureTests(unittest.TestCase):
             probe.capture(io.BytesIO(b"{}"), self.root / "missing")
         self.assertFalse((self.root / "missing").exists())
 
+    def test_invalid_draft_command_creates_nothing(self):
+        with self.assertRaises(ValueError):
+            probe.draft(self.root / "missing" / "$invalid")
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_draft_rejects_linked_ancestor_before_creating_directories(self):
+        with patch.object(Path, "is_junction", lambda path: path == self.root):
+            with self.assertRaises(ValueError):
+                probe.draft(self.root / "nested" / "draft")
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_failed_draft_write_rolls_back_without_removing_foreign_file(self):
+        destination = self.root / "new-parent" / "draft"
+        foreign = destination.parent / "not-owned"
+
+        def fail_after_partial_write(config, stream, **kwargs):
+            stream.write("{")
+            foreign.write_bytes(b"keep")
+            raise OSError("write failed")
+
+        with patch.object(json, "dump", side_effect=fail_after_partial_write):
+            with self.assertRaisesRegex(OSError, "write failed"):
+                probe.draft(destination)
+        self.assertFalse(destination.exists())
+        self.assertEqual(foreign.read_bytes(), b"keep")
+        self.assertFalse(probe.draft(destination)["activated"])
+
     def test_linked_directory_is_refused_before_reading_input(self):
         with patch.object(Path, "is_junction", return_value=True):
             with self.assertRaises(ValueError):
