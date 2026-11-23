@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import uuid
 from unittest.mock import patch
 
 import claude_signal_capture as probe
@@ -122,6 +123,31 @@ class SignalCaptureTests(unittest.TestCase):
         self.assertFalse(list((directory / "events").iterdir()))
         with self.assertRaises(FileExistsError):
             probe.draft(directory)
+
+    def test_scoped_draft_filters_before_publishing(self):
+        target = uuid.uuid4()
+        proposal = probe.draft(self.root / "draft", target)
+        hooks = json.loads(Path(proposal["draft"]).read_bytes())["hooks"]
+        self.assertEqual(set(hooks), {"Stop", "Notification"})
+        directory = Path(proposal["events"])
+        for event in hooks:
+            command = hooks[event][0]["hooks"][0]["command"]
+            self.assertTrue(command.endswith(f" --session-id {target}"))
+            for identity in ({}, {"session_id": None}, {"session_id": str(uuid.uuid4())},
+                             {"session_id": str(target)}):
+                before = set(directory.iterdir())
+                value = {"hook_event_name": event, "message": "PRIVATE", **identity}
+                p = subprocess.run(command, shell=True, input=json.dumps(value), text=True,
+                                   capture_output=True, timeout=10)
+                self.assertEqual((p.returncode, p.stdout, p.stderr), (0, "", ""))
+                added = set(directory.iterdir()) - before
+                if identity.get("session_id") == str(target):
+                    self.assertEqual(len(added), 1)
+                    record = added.pop().read_text()
+                    self.assertNotIn("PRIVATE", record)
+                    self.assertEqual(json.loads(record)["event"], event)
+                else:
+                    self.assertFalse(added)
 
     def test_capture_does_not_create_missing_directory(self):
         with self.assertRaises(ValueError):

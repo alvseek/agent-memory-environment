@@ -82,7 +82,7 @@ def project(value: dict) -> dict:
     return result
 
 
-def capture(stream, directory: Path) -> Path:
+def capture(stream, directory: Path, session_id: uuid.UUID | None = None) -> Path | None:
     """One atomic file per callback; timestamps are receipt order, not causality."""
     if not directory.is_dir() or any(
         part.is_symlink() or part.is_junction() for part in (directory, *directory.parents)
@@ -91,7 +91,13 @@ def capture(stream, directory: Path) -> Path:
     raw = stream.read(MAX_INPUT + 1)
     if len(raw) > MAX_INPUT:
         raise ValueError("Hook input exceeds capture bound")
-    result = project(json.loads(raw))
+    value = json.loads(raw)
+    if session_id is not None and (
+        not isinstance(value, dict) or value.get("session_id") != str(session_id)
+        or value.get("hook_event_name") not in ("Stop", "Notification")
+    ):
+        return None
+    result = project(value)
     encoded = (json.dumps(result, ensure_ascii=True, separators=(",", ":")) + "\n").encode("utf-8")
     if len(encoded) > MAX_OUTPUT:
         raise ValueError("Projected record exceeds capture bound")
@@ -106,7 +112,7 @@ def capture(stream, directory: Path) -> Path:
     return target
 
 
-def settings(directory: Path) -> dict:
+def settings(directory: Path, session_id: uuid.UUID | None = None) -> dict:
     # Shell form works with the affected build's existing Git Bash hook runner.
     command = " ".join(
         '"' + str(part).replace("\\", "/") + '"'
@@ -114,16 +120,18 @@ def settings(directory: Path) -> dict:
     )
     if any(character in command for character in ("\n", "\r", "$", "`")):
         raise ValueError("Hook path requires explicit quoting review")
+    if session_id is not None:
+        command += f" --session-id {session_id}"
     return {"hooks": {
         event: [{"hooks": [{"type": "command", "command": command, "timeout": 5}]}]
-        for event in EVENTS
+        for event in (EVENTS if session_id is None else ("Stop", "Notification"))
     }}
 
 
-def draft(directory: Path) -> dict:
+def draft(directory: Path, session_id: uuid.UUID | None = None) -> dict:
     directory = directory.absolute()
     events = directory / "events"
-    config = settings(events)
+    config = settings(events, session_id)
     path = directory / "settings.draft.json"
     if ".." in directory.parts or any(
         part.is_symlink() or part.is_junction() for part in (directory, *directory.parents)
@@ -155,12 +163,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("draft", "capture"))
     parser.add_argument("directory", type=Path)
+    parser.add_argument("--session-id", type=uuid.UUID)
     args = parser.parse_args()
     try:
         if args.mode == "draft":
-            print(json.dumps(draft(args.directory)))
+            print(json.dumps(draft(args.directory, args.session_id)))
         else:
-            capture(sys.stdin.buffer, args.directory)
+            capture(sys.stdin.buffer, args.directory, args.session_id)
         return 0
     except Exception as exc:
         # Exception messages may contain source JSON, paths or secrets.
