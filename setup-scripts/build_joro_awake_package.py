@@ -31,6 +31,8 @@ FILES = (
     "scripts/windows/joro_watcher/__init__.py",
     "scripts/windows/joro_watcher/event_log.py",
     "scripts/windows/joro_watcher/power.py",
+    "scripts/windows/joro_watcher/power_snapshot.py",
+    "scripts/windows/joro_watcher/snapshot_viewer.py",
     "scripts/windows/joro_watcher/tray.py",
     "setup-scripts/install_keep_awake.py",
     "tests/test_keep_awake.py",
@@ -39,6 +41,7 @@ FILES = (
     "tests/test_keep_awake_installer.py",
     "tests/test_keep_awake_lifecycle.py",
     "tests/test_keep_awake_opencode.py",
+    "tests/test_keep_awake_power_snapshot.py",
     "tests/test_keep_awake_tray.py",
     "tests/test_keep_awake_tray_lifecycle.py",
 )

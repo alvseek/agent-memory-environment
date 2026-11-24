@@ -35,6 +35,9 @@ class PackageTests(unittest.TestCase):
                 names = set(bundle.namelist())
             for name in installer.FILES + ("README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"):
                 self.assertIn(f"{prefix}/{name}", names)
+            self.assertIn("scripts/windows/joro_watcher/power_snapshot.py", installer.FILES)
+            self.assertIn("scripts/windows/joro_watcher/snapshot_viewer.py", installer.FILES)
+            self.assertIn(f"{prefix}/tests/test_keep_awake_power_snapshot.py", names)
             private = [name for name in names
                        if name.endswith(".pyc") or "/.git/" in name or "/.venv/" in name]
             self.assertEqual(private, [])
