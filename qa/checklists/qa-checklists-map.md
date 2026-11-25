@@ -12,6 +12,7 @@
 | Tray and logs | [tray-and-logs.md](tray-and-logs.md) | exists-documented | Risk-derived checks; not yet run or signed off. |
 | Source preview extraction | [joro-awake-source-preview.md](joro-awake-source-preview.md) | exists-documented | Package and forwarding evidence separate from native install/uninstall sign-off. |
 | Crash log | [crash-log.md](crash-log.md) | exists-documented | Risk-derived checks; happy path seen once during the build, not run as a QA pass or signed off. |
+| OpenCode shell handoff | [opencode-shell-handoff.md](opencode-shell-handoff.md#result) | exists-documented | Screen-off handoff and final release verified on AC; concurrent installed request limits attribution. |
 
 ## Gaps
 
